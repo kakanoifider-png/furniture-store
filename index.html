@@ -2,51 +2,339 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Furniture Store</title>
+<title>Furniture Store Pro</title>
+
 <style>
-body{font-family:sans-serif;margin:0;background:#f5f5f5}
-header{background:#222;color:#fff;padding:15px;text-align:center}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px;padding:20px}
-.card{background:#fff;padding:10px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-.card img{width:100%;height:150px;object-fit:cover}
-button{width:100%;padding:8px;background:#222;color:white;border:none}
+body{
+margin:0;
+font-family:Arial;
+background:#f3f4f6;
+display:flex;
+justify-content:center;
+}
+
+/* 📱 MOBILE APP STYLE */
+@media(max-width:768px){
+.main{width:100%;}
+.side{display:none;}
+.auth{position:static;margin:10px;}
+.topbar{flex-direction:column;}
+}
+
+/* боковые фоны */
+.side{
+position:fixed;
+top:0;
+width:12%;
+height:100vh;
+background:url("https://images.unsplash.com/photo-1505691938895-1758d7feb511") center/cover;
+filter:brightness(0.6);
+}
+.left{left:0;}
+.right{right:0;}
+
+.main{
+width:76%;
+background:white;
+min-height:100vh;
+padding:20px;
+}
+
+/* header */
+header{
+font-size:24px;
+font-weight:bold;
+text-align:center;
+color:#232f3e;
+}
+
+/* topbar */
+.topbar{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin:10px 0;
+}
+
+input{
+padding:10px;
+flex:1;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+button{
+padding:10px;
+border:none;
+cursor:pointer;
+border-radius:6px;
+font-weight:bold;
+}
+
+.btn{background:#ff9900;}
+.btn2{background:#232f3e;color:white;}
+.btn3{background:#e91e63;color:white;}
+.btn-danger{background:#d32f2f;color:white;}
+
+/* карточки */
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+gap:15px;
+}
+
+.card{
+border:1px solid #eee;
+border-radius:10px;
+overflow:hidden;
+background:white;
+}
+
+.card img{
+width:100%;
+height:140px;
+object-fit:cover;
+}
+
+.card h3{margin:10px;}
+.card p{margin:10px;color:#b12704;font-weight:bold;}
+
+.card button{width:100%;}
+
+/* корзина */
+.cart{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#232f3e;
+color:white;
+padding:15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.box{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+width:320px;
+padding:15px;
+border:1px solid #ccc;
+display:none;
+z-index:10;
+}
+
+/* auth */
+.auth{
+position:fixed;
+top:10px;
+right:10px;
+background:white;
+padding:10px;
+border:1px solid #ccc;
+border-radius:8px;
+}
+
+/* role badge */
+.role{
+position:fixed;
+top:10px;
+left:10px;
+background:#232f3e;
+color:white;
+padding:5px 10px;
+border-radius:6px;
+font-size:12px;
+}
+
+/* dark */
+.dark{
+background:#121212;
+color:white;
+}
+.dark .main{background:#1e1e1e;}
+.dark .card{background:#2a2a2a;border-color:#333;}
+.dark input{background:#333;color:white;}
 </style>
 </head>
+
 <body>
 
-<header>
-<h2>🛋️ Furniture Store</h2>
-</header>
+<div class="role" id="role">ROLE: client</div>
+
+<div class="side left"></div>
+
+<div class="main">
+
+<header>🛋️ Furniture Store PRO</header>
+
+<div class="auth">
+<input id="user" placeholder="логин">
+<input id="pass" placeholder="пароль">
+<button onclick="login()">Войти</button>
+</div>
+
+<div class="topbar">
+<input id="search" placeholder="Поиск..." oninput="render()">
+<button class="btn2" onclick="toggleTheme()">Тема</button>
+<button class="btn2" onclick="toggleAdmin()">Админ</button>
+<button class="btn" onclick="openCart()">Корзина</button>
+<button class="btn3" onclick="openFav()">❤️</button>
+</div>
+
+<!-- админ -->
+<div id="admin" style="display:none">
+<div class="topbar">
+<input id="name" placeholder="Название">
+<input id="price" placeholder="Цена">
+<input id="img" placeholder="Фото URL">
+<button class="btn" onclick="addProduct()">Добавить</button>
+</div>
+</div>
 
 <div class="products" id="products"></div>
 
+</div>
+
+<div class="side right"></div>
+
+<!-- корзина -->
+<div class="cart" onclick="openCart()">🛒</div>
+
+<!-- окна -->
+<div class="box" id="cartBox">
+<h3>Корзина</h3>
+<div id="cartItems"></div>
+<input id="address" placeholder="Адрес доставки">
+<button class="btn" onclick="pay()">💳 Оплата</button>
+<button onclick="closeBox()">Закрыть</button>
+</div>
+
+<div class="box" id="favBox">
+<h3>Избранное</h3>
+<div id="favItems"></div>
+<button onclick="closeBox()">Закрыть</button>
+</div>
+
+<div class="box" id="payBox">
+<h3>Оплата</h3>
+<p>✔ Успешно</p>
+<p id="deliveryStatus">Статус: в пути 🚚</p>
+<button onclick="closeBox()">OK</button>
+</div>
+
 <script>
-let products = [
-{name:"Диван", price:250000},
-{name:"Стол", price:80000},
-{name:"Шкаф", price:180000},
-{name:"Кровать", price:220000},
-{name:"Кресло", price:90000},
-{name:"Тумба", price:50000},
-{name:"Комод", price:120000},
-{name:"Полка", price:40000},
-{name:"Стул", price:30000},
-{name:"Офисный стол", price:110000}
+
+let role="client";
+
+let products = JSON.parse(localStorage.getItem("p")) || [
+{name:"Диван",price:250000,img:"https://via.placeholder.com/300"}
 ];
 
-let container = document.getElementById("products");
+let cart=[];
+let fav=[];
+let orders=[];
 
-products.forEach(p=>{
-let div = document.createElement("div");
-div.className="card";
-div.innerHTML=`
-<img src="https://via.placeholder.com/300">
+/* ROLE LOGIN */
+function login(){
+role="admin";
+document.getElementById("role").innerText="ROLE: admin";
+alert("Вы вошли как админ");
+}
+
+/* SAVE */
+function save(){
+localStorage.setItem("p",JSON.stringify(products));
+}
+
+/* RENDER */
+function render(){
+let s=document.getElementById("search").value?.toLowerCase()||"";
+let c=document.getElementById("products");
+c.innerHTML="";
+
+products.filter(p=>p.name.toLowerCase().includes(s)).forEach((p,i)=>{
+c.innerHTML+=`
+<div class="card">
+<img src="${p.img}">
 <h3>${p.name}</h3>
 <p>${p.price} ₸</p>
-<button>Купить</button>
+<button class="btn" onclick="cart.push(products[${i}])">В корзину</button>
+<button class="btn3" onclick="fav.push(products[${i}])">❤</button>
+</div>
 `;
-container.appendChild(div);
 });
+save();
+}
+
+/* ADD */
+function addProduct(){
+products.push({
+name:name.value,
+price:price.value,
+img:img.value||"https://via.placeholder.com/300"
+});
+render();
+}
+
+/* CART */
+function openCart(){
+document.getElementById("cartBox").style.display="block";
+let d=document.getElementById("cartItems");
+d.innerHTML="";
+cart.forEach(c=>{
+d.innerHTML+=`<div>${c.name} - ${c.price}</div>`;
+});
+}
+
+/* FAVORITES */
+function openFav(){
+document.getElementById("favBox").style.display="block";
+let d=document.getElementById("favItems");
+d.innerHTML="";
+fav.forEach(f=>{
+d.innerHTML+=`<div>${f.name}</div>`;
+});
+}
+
+/* PAYMENT + DELIVERY STATUS */
+function pay(){
+document.getElementById("payBox").style.display="block";
+
+setTimeout(()=>{
+document.getElementById("deliveryStatus").innerText="Статус: в пути 🚚";
+},1000);
+
+setTimeout(()=>{
+document.getElementById("deliveryStatus").innerText="Статус: доставлено ✔";
+},4000);
+
+cart=[];
+}
+
+/* THEME */
+function toggleTheme(){
+document.body.classList.toggle("dark");
+}
+
+/* ADMIN */
+function toggleAdmin(){
+if(role!="admin"){
+alert("Только админ");
+return;
+}
+document.getElementById("admin").style.display="block";
+}
+
+/* CLOSE */
+function closeBox(){
+document.querySelectorAll(".box").forEach(b=>b.style.display="none");
+}
+
+render();
+
 </script>
 
 </body>
